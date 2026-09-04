@@ -1,0 +1,21 @@
+{
+  "name": "developer-battleground",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Suprît Panda — Developer Battleground (full-stack tactical portfolio)",
+  "scripts": {
+    "dev": "concurrently -n client,server -c cyan,yellow \"npm run client:dev\" \"npm run server:dev\"",
+    "client:install": "cd client && npm install",
+    "server:install": "cd server && npm install",
+    "install:all": "npm run client:install && npm run server:install",
+    "client:dev": "cd client && npm run dev",
+    "server:dev": "cd server && npm run dev",
+    "client:build": "cd client && npm run build",
+    "server:build": "cd server && npm run build",
+    "seed": "cd server && npm run seed",
+    "create-admin": "cd server && npm run create-admin"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  }
+}

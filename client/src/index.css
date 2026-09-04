@@ -1,0 +1,146 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --tactical-bg: #05050c;
+  --tactical-accent: #22d3ee;
+  --tactical-alt: #e879f9;
+  --tactical-danger: #f43f5e;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  background: var(--tactical-bg);
+  color: #e2e8f0;
+  font-family: 'Rajdhani', sans-serif;
+  overflow-x: hidden;
+  cursor:
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 28 28'><circle cx='14' cy='14' r='2.2' fill='none' stroke='%2322d3ee' stroke-width='1.4'/><circle cx='14' cy='14' r='0.8' fill='%23e879f9'/><path d='M14 2v7M14 19v7M2 14h7M19 14h7' stroke='%2322d3ee' stroke-width='1.4' stroke-linecap='round'/></svg>")
+      14 14,
+    crosshair;
+}
+
+/* Aim pointer across interactive elements too */
+button,
+a,
+[role='button'],
+label,
+summary {
+  cursor:
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 28 28'><circle cx='14' cy='14' r='2.2' fill='none' stroke='%2322d3ee' stroke-width='1.4'/><circle cx='14' cy='14' r='0.8' fill='%23e879f9'/><path d='M14 2v7M14 19v7M2 14h7M19 14h7' stroke='%2322d3ee' stroke-width='1.4' stroke-linecap='round'/></svg>")
+      14 14,
+    pointer;
+}
+
+input,
+textarea,
+select {
+  cursor: text;
+}
+
+/* ---- Tactical base layers ---- */
+.tactical-grid {
+  background-image:
+    linear-gradient(rgba(34, 211, 238, 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(34, 211, 238, 0.06) 1px, transparent 1px);
+  background-size: 48px 48px;
+}
+
+.scanlines::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 5;
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent 0px,
+    transparent 2px,
+    rgba(0, 0, 0, 0.08) 3px,
+    transparent 3px
+  );
+}
+
+/* ---- Glass panel ---- */
+.glass-panel {
+  background: linear-gradient(150deg, rgba(10, 12, 24, 0.85), rgba(8, 8, 20, 0.55));
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(34, 211, 238, 0.25);
+  box-shadow:
+    0 0 24px rgba(0, 0, 0, 0.5),
+    inset 0 0 24px rgba(34, 211, 238, 0.05);
+}
+
+.tactical-corners {
+  position: relative;
+}
+
+.tactical-corners::before,
+.tactical-corners::after {
+  content: '';
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  border-color: var(--tactical-accent);
+  border-style: solid;
+}
+
+.tactical-corners::before {
+  top: 6px;
+  left: 6px;
+  border-width: 2px 0 0 2px;
+}
+
+.tactical-corners::after {
+  bottom: 6px;
+  right: 6px;
+  border-width: 0 2px 2px 0;
+}
+
+/* ---- Text styles ---- */
+.text-glow {
+  text-shadow: 0 0 12px rgba(34, 211, 238, 0.6);
+}
+
+.text-glow-alt {
+  text-shadow: 0 0 12px rgba(232, 121, 249, 0.6);
+}
+
+.clip-corner {
+  clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 14px, 100% 100%, 14px 100%, 0 calc(100% - 14px));
+}
+
+/* ---- Scrollbar ---- */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #0a0a16;
+}
+::-webkit-scrollbar-thumb {
+  background: #22d3ee55;
+  border-radius: 4px;
+}
+
+/* ---- Reduced motion ---- */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
