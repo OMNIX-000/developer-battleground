@@ -13,8 +13,9 @@ async function createAdmin() {
   const existing = await User.findOne({ email: config.adminEmail })
   if (existing) {
     existing.role = 'admin'
+    if (config.adminPassword) existing.password = config.adminPassword
     await existing.save()
-    console.log(`[ADMIN] ${config.adminEmail} promoted to admin.`)
+    console.log(`[ADMIN] ${config.adminEmail} updated (role + password).`)
   } else {
     await User.create({
       name: 'Administrator',
