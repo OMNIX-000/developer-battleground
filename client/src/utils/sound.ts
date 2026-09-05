@@ -46,9 +46,17 @@ class SoundSystem {
 
   enable(): void {
     this.enabled = true
-    const ctx = this.ensureContext()
-    void ctx.resume()
-    this.startAmbience()
+    try {
+      const ctx = this.ensureContext()
+      if (ctx.state === 'suspended') void ctx.resume()
+      if (this.ambientGain) {
+        this.ambientGain.gain.cancelScheduledValues(ctx.currentTime)
+        this.ambientGain.gain.setTargetAtTime(1, ctx.currentTime, 0.3)
+      }
+      this.startAmbience()
+    } catch {
+      /* audio unavailable — ignore, button stays usable */
+    }
   }
 
   disable(): void {
@@ -57,10 +65,10 @@ class SoundSystem {
       window.clearInterval(this.heartbeatTimer)
       this.heartbeatTimer = null
     }
-    if (this.ambientGain) {
-      this.ambientGain.gain.setTargetAtTime(0, this.ctx?.currentTime ?? 0, 0.3)
+    if (this.ambientGain && this.ctx) {
+      this.ambientGain.gain.cancelScheduledValues(this.ctx.currentTime)
+      this.ambientGain.gain.setTargetAtTime(0, this.ctx.currentTime, 0.15)
     }
-    void this.ctx?.suspend()
   }
 
   isEnabled(): boolean {

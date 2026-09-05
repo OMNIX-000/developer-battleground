@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 import { soundSystem } from '@/utils/sound'
 
@@ -48,6 +48,7 @@ function detectQuality(): GraphicsQuality {
 
 export function SettingsProvider({ children }: { children: ReactNode }) {
   const [settings, setSettings] = useState<SettingsState>(loadSettings)
+  const soundEnabledRef = useRef(settings.soundEnabled)
 
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(settings))
@@ -62,8 +63,17 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
     soundSystem.setVolume(settings.soundVolume / 100)
   }, [settings.soundVolume])
 
+  useEffect(() => {
+    soundEnabledRef.current = settings.soundEnabled
+  }, [settings.soundEnabled])
+
   const toggleSound = useCallback(() => {
-    setSettings((s) => ({ ...s, soundEnabled: !s.soundEnabled }))
+    const next = !soundEnabledRef.current
+    // Start/stop audio synchronously inside the user gesture so the browser
+    // autoplay policy lets the AudioContext actually run.
+    if (next) soundSystem.enable()
+    else soundSystem.disable()
+    setSettings((s) => ({ ...s, soundEnabled: next }))
   }, [])
 
   const toggleNotifications = useCallback(() => {

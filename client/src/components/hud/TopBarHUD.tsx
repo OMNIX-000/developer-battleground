@@ -33,6 +33,15 @@ function TopBarHUD() {
     })
   }
 
+  const handleToggleSound = () => {
+    toggleSound()
+    push({
+      title: soundEnabled ? 'AUDIO OFFLINE' : 'AUDIO ONLINE',
+      subtitle: soundEnabled ? 'Terror ambience stopped' : 'Terror ambience engaged',
+      type: 'system',
+    })
+  }
+
   return (
     <div className="pointer-events-none fixed inset-x-0 top-0 z-40 flex items-start justify-between gap-4 p-4">
       <div className="pointer-events-auto flex flex-col gap-2">
@@ -59,7 +68,7 @@ function TopBarHUD() {
           )}
         </IconButton>
 
-        <IconButton label="Sound: ON (Terror Ambience)" onClick={toggleSound} active={soundEnabled}>
+        <IconButton label={soundEnabled ? 'Sound: ON (Terror Ambience)' : 'Sound: OFF'} onClick={handleToggleSound} active={soundEnabled}>
           {soundEnabled ? <Volume2 className="h-4 w-4" /> : <VolumeX className="h-4 w-4" />}
         </IconButton>
 
