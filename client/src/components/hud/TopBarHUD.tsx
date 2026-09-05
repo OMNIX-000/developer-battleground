@@ -8,6 +8,8 @@ import type { GraphicsQuality } from '@/store/settings'
 function TopBarHUD() {
   const {
     soundEnabled,
+    soundVolume,
+    setSoundVolume,
     toggleSound,
     notificationsEnabled,
     toggleNotifications,
@@ -96,10 +98,12 @@ function TopBarHUD() {
       {showSettings && (
         <SettingsPanel
           soundEnabled={soundEnabled}
+          soundVolume={soundVolume}
           notificationsEnabled={notificationsEnabled}
           quality={quality}
           onToggleSound={toggleSound}
           onToggleNotifications={toggleNotifications}
+          onVolume={setSoundVolume}
           onQuality={setQuality}
           onClose={() => setShowSettings(false)}
         />
@@ -110,18 +114,22 @@ function TopBarHUD() {
 
 function SettingsPanel({
   soundEnabled,
+  soundVolume,
   notificationsEnabled,
   quality,
   onToggleSound,
   onToggleNotifications,
+  onVolume,
   onQuality,
   onClose,
 }: {
   soundEnabled: boolean
+  soundVolume: number
   notificationsEnabled: boolean
   quality: GraphicsQuality
   onToggleSound: () => void
   onToggleNotifications: () => void
+  onVolume: (v: number) => void
   onQuality: (q: GraphicsQuality) => void
   onClose: () => void
 }) {
@@ -149,6 +157,29 @@ function SettingsPanel({
         <div className="flex flex-col gap-3 font-mono text-xs">
           <SettingToggle label="Audio Terror" hint="Dark ambience, heartbeat, dissonant drones" checked={soundEnabled} onChange={onToggleSound} />
           <SettingToggle label="Transmissions" hint="Toast alerts + alert sound" checked={notificationsEnabled} onChange={onToggleNotifications} />
+
+          <div className="flex flex-col gap-1.5">
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] uppercase tracking-widest text-gray-500">Master Volume</span>
+              <span className={cn('font-display text-[10px] font-bold', soundVolume === 0 ? 'text-gray-500' : 'text-tactical-accent')}>
+                {soundVolume}%
+              </span>
+            </div>
+            <input
+              type="range"
+              min={0}
+              max={100}
+              step={5}
+              value={soundVolume}
+              onChange={(e) => onVolume(Number(e.target.value))}
+              aria-label="Sound volume"
+              className="h-1.5 w-full cursor-pointer appearance-none rounded-full bg-white/10 accent-[#22d3ee]"
+            />
+            <div className="flex justify-between font-mono text-[8px] uppercase tracking-widest text-gray-600">
+              <span>Silent</span>
+              <span>Maximum</span>
+            </div>
+          </div>
 
           <div className="flex flex-col gap-1.5">
             <span className="text-[10px] uppercase tracking-widest text-gray-500">Render Quality</span>

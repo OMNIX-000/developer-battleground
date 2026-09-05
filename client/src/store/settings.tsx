@@ -6,6 +6,7 @@ export type GraphicsQuality = 'LOW' | 'MEDIUM' | 'HIGH'
 
 interface SettingsState {
   soundEnabled: boolean
+  soundVolume: number
   quality: GraphicsQuality
   notificationsEnabled: boolean
 }
@@ -14,6 +15,7 @@ interface SettingsContextValue extends SettingsState {
   toggleSound: () => void
   toggleNotifications: () => void
   setQuality: (q: GraphicsQuality) => void
+  setSoundVolume: (v: number) => void
 }
 
 const SettingsContext = createContext<SettingsContextValue | undefined>(undefined)
@@ -23,6 +25,7 @@ const STORAGE_KEY = 'db_settings'
 function loadSettings(): SettingsState {
   const defaults: SettingsState = {
     soundEnabled: false,
+    soundVolume: 100,
     quality: detectQuality(),
     notificationsEnabled: true,
   }
@@ -55,6 +58,10 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
     else soundSystem.disable()
   }, [settings.soundEnabled])
 
+  useEffect(() => {
+    soundSystem.setVolume(settings.soundVolume / 100)
+  }, [settings.soundVolume])
+
   const toggleSound = useCallback(() => {
     setSettings((s) => ({ ...s, soundEnabled: !s.soundEnabled }))
   }, [])
@@ -67,9 +74,13 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
     setSettings((s) => ({ ...s, quality }))
   }, [])
 
+  const setSoundVolume = useCallback((volume: number) => {
+    setSettings((s) => ({ ...s, soundVolume: Math.min(100, Math.max(0, volume)) }))
+  }, [])
+
   const value = useMemo(
-    () => ({ ...settings, toggleSound, toggleNotifications, setQuality }),
-    [settings, toggleSound, toggleNotifications, setQuality],
+    () => ({ ...settings, toggleSound, toggleNotifications, setQuality, setSoundVolume }),
+    [settings, toggleSound, toggleNotifications, setQuality, setSoundVolume],
   )
 
   return <SettingsContext.Provider value={value}>{children}</SettingsContext.Provider>

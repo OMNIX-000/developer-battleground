@@ -15,6 +15,7 @@ class SoundSystem {
   private ambientGain: GainNode | null = null
   private nodes: AudioNode[] = []
   private heartbeatTimer: number | null = null
+  private volume = 0.9
 
   private ensureContext(): AudioContext {
     if (!this.ctx) {
@@ -23,13 +24,24 @@ class SoundSystem {
         (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext
       this.ctx = new Ctor()
       this.master = this.ctx.createGain()
-      this.master.gain.value = 0.9
+      this.master.gain.value = this.volume
       this.master.connect(this.ctx.destination)
       this.ambientGain = this.ctx.createGain()
       this.ambientGain.gain.value = 0
       this.ambientGain.connect(this.master)
     }
     return this.ctx
+  }
+
+  setVolume(value: number): void {
+    this.volume = Math.min(1, Math.max(0, value))
+    if (this.master && this.ctx) {
+      this.master.gain.setTargetAtTime(this.volume, this.ctx.currentTime, 0.05)
+    }
+  }
+
+  getVolume(): number {
+    return this.volume
   }
 
   enable(): void {
@@ -77,7 +89,7 @@ class SoundSystem {
     droneB.type = 'sine'
     droneB.frequency.value = 28.4
     const droneGain = ctx.createGain()
-    droneGain.gain.value = 0.16
+    droneGain.gain.value = 0.34
     droneA.connect(droneGain)
     droneB.connect(droneGain)
     droneGain.connect(ambience)
@@ -96,7 +108,7 @@ class SoundSystem {
     growlFilter.type = 'lowpass'
     growlFilter.frequency.value = 140
     const growlGain = ctx.createGain()
-    growlGain.gain.value = 0.05
+    growlGain.gain.value = 0.1
     growl1.connect(growlFilter)
     growl2.connect(growlFilter)
     growlFilter.connect(growlGain)
@@ -113,11 +125,11 @@ class SoundSystem {
     shimmer2.type = 'triangle'
     shimmer2.frequency.value = 527.4
     const shimmerGain = ctx.createGain()
-    shimmerGain.gain.value = 0.003
+    shimmerGain.gain.value = 0.007
     const lfo = ctx.createOscillator()
     lfo.frequency.value = 0.08
     const lfoGain = ctx.createGain()
-    lfoGain.gain.value = 0.003
+    lfoGain.gain.value = 0.006
     lfo.connect(lfoGain)
     lfoGain.connect(shimmerGain.gain)
     shimmer1.connect(shimmerGain)
@@ -140,11 +152,11 @@ class SoundSystem {
     noiseFilter.frequency.value = 160
     noiseFilter.Q.value = 0.8
     const noiseGain = ctx.createGain()
-    noiseGain.gain.value = 0.02
+    noiseGain.gain.value = 0.045
     const windLfo = ctx.createOscillator()
     windLfo.frequency.value = 0.05
     const windLfoGain = ctx.createGain()
-    windLfoGain.gain.value = 0.018
+    windLfoGain.gain.value = 0.04
     windLfo.connect(windLfoGain)
     windLfoGain.connect(noiseGain.gain)
     noise.connect(noiseFilter)
@@ -175,7 +187,7 @@ class SoundSystem {
     osc.frequency.exponentialRampToValueAtTime(28, t + 0.12)
     const gain = this.ctx.createGain()
     gain.gain.setValueAtTime(0, t)
-    gain.gain.linearRampToValueAtTime(0.28, t + 0.02)
+    gain.gain.linearRampToValueAtTime(0.4, t + 0.02)
     gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.4)
     osc.connect(gain)
     gain.connect(this.master)
