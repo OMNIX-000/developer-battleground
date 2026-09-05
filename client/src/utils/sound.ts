@@ -15,7 +15,7 @@ class SoundSystem {
   private ambientGain: GainNode | null = null
   private nodes: AudioNode[] = []
   private heartbeatTimer: number | null = null
-  private volume = 0.9
+  private volume = 1
 
   private ensureContext(): AudioContext {
     if (!this.ctx) {
@@ -81,23 +81,28 @@ class SoundSystem {
 
     const ambience = this.ambientGain
 
-    // Low drone with beating (two detuned sub oscillators)
+    // Low drone with beating (two detuned sub oscillators) + audible overtone
     const droneA = ctx.createOscillator()
     droneA.type = 'sine'
     droneA.frequency.value = 28
     const droneB = ctx.createOscillator()
     droneB.type = 'sine'
     droneB.frequency.value = 28.4
+    const droneC = ctx.createOscillator()
+    droneC.type = 'sine'
+    droneC.frequency.value = 56.6
     const droneGain = ctx.createGain()
-    droneGain.gain.value = 0.34
+    droneGain.gain.value = 0.3
     droneA.connect(droneGain)
     droneB.connect(droneGain)
+    droneC.connect(droneGain)
     droneGain.connect(ambience)
     droneA.start()
     droneB.start()
-    this.nodes.push(droneA, droneB, droneGain)
+    droneC.start()
+    this.nodes.push(droneA, droneB, droneC, droneGain)
 
-    // Dark growl: detuned saws filtered low
+    // Dark growl: detuned saws filtered low-mid (audible on laptop speakers)
     const growl1 = ctx.createOscillator()
     growl1.type = 'sawtooth'
     growl1.frequency.value = 54
@@ -106,9 +111,9 @@ class SoundSystem {
     growl2.frequency.value = 54.7
     const growlFilter = ctx.createBiquadFilter()
     growlFilter.type = 'lowpass'
-    growlFilter.frequency.value = 140
+    growlFilter.frequency.value = 340
     const growlGain = ctx.createGain()
-    growlGain.gain.value = 0.1
+    growlGain.gain.value = 0.22
     growl1.connect(growlFilter)
     growl2.connect(growlFilter)
     growlFilter.connect(growlGain)
@@ -125,11 +130,11 @@ class SoundSystem {
     shimmer2.type = 'triangle'
     shimmer2.frequency.value = 527.4
     const shimmerGain = ctx.createGain()
-    shimmerGain.gain.value = 0.007
+    shimmerGain.gain.value = 0.02
     const lfo = ctx.createOscillator()
     lfo.frequency.value = 0.08
     const lfoGain = ctx.createGain()
-    lfoGain.gain.value = 0.006
+    lfoGain.gain.value = 0.014
     lfo.connect(lfoGain)
     lfoGain.connect(shimmerGain.gain)
     shimmer1.connect(shimmerGain)
@@ -149,14 +154,14 @@ class SoundSystem {
     noise.loop = true
     const noiseFilter = ctx.createBiquadFilter()
     noiseFilter.type = 'bandpass'
-    noiseFilter.frequency.value = 160
-    noiseFilter.Q.value = 0.8
+    noiseFilter.frequency.value = 480
+    noiseFilter.Q.value = 1.1
     const noiseGain = ctx.createGain()
-    noiseGain.gain.value = 0.045
+    noiseGain.gain.value = 0.09
     const windLfo = ctx.createOscillator()
     windLfo.frequency.value = 0.05
     const windLfoGain = ctx.createGain()
-    windLfoGain.gain.value = 0.04
+    windLfoGain.gain.value = 0.07
     windLfo.connect(windLfoGain)
     windLfoGain.connect(noiseGain.gain)
     noise.connect(noiseFilter)
@@ -165,6 +170,22 @@ class SoundSystem {
     noise.start()
     windLfo.start()
     this.nodes.push(noise, noiseFilter, noiseGain, windLfo, windLfoGain)
+
+    // Machinery hum: mid harmonics audible on laptop/phone speakers
+    const hum1 = ctx.createOscillator()
+    hum1.type = 'sine'
+    hum1.frequency.value = 164
+    const hum2 = ctx.createOscillator()
+    hum2.type = 'triangle'
+    hum2.frequency.value = 247
+    const humGain = ctx.createGain()
+    humGain.gain.value = 0.055
+    hum1.connect(humGain)
+    hum2.connect(humGain)
+    humGain.connect(ambience)
+    hum1.start()
+    hum2.start()
+    this.nodes.push(hum1, hum2, humGain)
 
     // Fade ambience in
     ambience.gain.setTargetAtTime(1, ctx.currentTime, 0.8)
@@ -187,7 +208,7 @@ class SoundSystem {
     osc.frequency.exponentialRampToValueAtTime(28, t + 0.12)
     const gain = this.ctx.createGain()
     gain.gain.setValueAtTime(0, t)
-    gain.gain.linearRampToValueAtTime(0.4, t + 0.02)
+    gain.gain.linearRampToValueAtTime(0.7, t + 0.02)
     gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.4)
     osc.connect(gain)
     gain.connect(this.master)
@@ -212,7 +233,7 @@ class SoundSystem {
     osc.type = type
     osc.frequency.setValueAtTime(freq, this.ctx.currentTime)
     gain.gain.setValueAtTime(0, this.ctx.currentTime)
-    gain.gain.linearRampToValueAtTime(0.12, this.ctx.currentTime + 0.01)
+    gain.gain.linearRampToValueAtTime(0.3, this.ctx.currentTime + 0.01)
     gain.gain.exponentialRampToValueAtTime(0.0001, this.ctx.currentTime + end)
     osc.connect(gain)
     gain.connect(this.master)
@@ -227,7 +248,7 @@ class SoundSystem {
     osc.type = type
     osc.frequency.setValueAtTime(freq * detuneRatio, this.ctx.currentTime)
     gain.gain.setValueAtTime(0, this.ctx.currentTime)
-    gain.gain.linearRampToValueAtTime(0.06, this.ctx.currentTime + 0.02)
+    gain.gain.linearRampToValueAtTime(0.14, this.ctx.currentTime + 0.02)
     gain.gain.exponentialRampToValueAtTime(0.0001, this.ctx.currentTime + end)
     osc.connect(gain)
     gain.connect(this.master)
